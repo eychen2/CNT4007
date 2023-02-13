@@ -1,13 +1,15 @@
 import java.io.*;
 import java.net.*;
-import java.util.Objects;
 import java.util.Scanner;
+// Found this class when looking how to represent numbers that would normally overflow longs from
+// java oracle site: https://docs.oracle.com/javase/7/docs/api/java/math/BigInteger.html
+import java.math.BigInteger;
 
 public class server {
     static boolean isInt(String check)
     {
         try{
-            int test = Integer.parseInt(check);
+            BigInteger test = new BigInteger(check);
             return true;
         }catch(NumberFormatException e){
             return false;
@@ -23,7 +25,9 @@ public class server {
         Scanner scan = new Scanner(System.in);
         int port = Integer.parseInt(scan.nextLine());
         ServerSocket server= new ServerSocket(port);
-        while(true)
+        int answer=0;
+        boolean checkInt=true;
+        outloop: while(true)
         {
             Socket client = server.accept();
             BufferedReader read = new BufferedReader(new InputStreamReader(client.getInputStream()));
@@ -32,7 +36,8 @@ public class server {
             System.out.println("reached");
             while((inputLine = read.readLine())!=null)
             {
-                System.out.println("reached");
+                answer=0;
+                checkInt=true;
                 String[] cheese = inputLine.split(" ");
 //                for(String word: cheese)
 //                {
@@ -46,61 +51,122 @@ public class server {
 //                    }
 //                }
                 String op = cheese[0];
-                System.out.println(op);
-                System.out.println(op.length());
+
                 if(op.equals("add"))
                 {
                     System.out.println("reached");
                     if(cheese.length<3)
                     {
-                        write.writeBytes(Integer.toString(-2) + '\n');
+                        write.writeBytes("-2"+'\n');
                     }
                     else if(cheese.length>5)
                     {
-                        write.writeBytes(Integer.toString(-3) + '\n');
+                        write.writeBytes("-3" + '\n');
                     }
                     else
                     {
-                        write.writeBytes("Valid operation"+'\n');
+                        for(int i=1; i<cheese.length; ++i)
+                        {
+                            if(!isInt(cheese[i]))
+                            {
+                                checkInt=false;
+                            }
+                        }
+                        if(!checkInt)
+                        {
+                            write.writeBytes("-4" +"\n");
+                        }
+                        else
+                        {
+                            BigInteger sum = new BigInteger(cheese[1]);
+                            for(int i=2; i<cheese.length;++i)
+                            {
+                                sum = sum.add(new BigInteger(cheese[i]));
+                            }
+
+                            write.writeBytes(sum.toString()+'\n');
+                        }
                     }
                 }
                 else if(op.equals("subtract"))
                 {
                     if(cheese.length<3)
                     {
-                        write.writeBytes(Integer.toString(-2)+'\n');
+                        write.writeBytes("-2"+'\n');
                     }
                     else if(cheese.length>5)
                     {
-                        write.writeBytes(Integer.toString(-3) + '\n');
+                        write.writeBytes("-3" + '\n');
                     }
                     else
                     {
-                        write.writeBytes("Valid operation"+'\n');
+                        for(int i=1; i<cheese.length; ++i)
+                        {
+                            if(!isInt(cheese[i]))
+                            {
+                                checkInt=false;
+                            }
+                        }
+                        if(!checkInt)
+                        {
+                            write.writeBytes("-4" +"\n");
+                        }
+                        else
+                        {
+                            for(int i=1; i<cheese.length;++i)
+                            {
+
+                            }
+                            write.writeBytes("Valid operation"+'\n');
+                        }
                     }
                 }
                 else if (op.equals("multiply"))
                 {
                     if(cheese.length<3)
                     {
-                        write.writeBytes(Integer.toString(-2)+'\n');
+                        write.writeBytes("-2"+'\n');
                     }
                     else if(cheese.length>5)
                     {
-                        write.writeBytes(Integer.toString(-3) + '\n');
+                        write.writeBytes("-3" + '\n');
                     }
                     else
                     {
-                        write.writeBytes("Valid operation"+'\n');
+                        for(int i=1; i<cheese.length; ++i)
+                        {
+                            if(!isInt(cheese[i]))
+                            {
+                                checkInt=false;
+                            }
+                        }
+                        if(!checkInt)
+                        {
+                            write.writeBytes("-4" +"\n");
+                        }
+                        else
+                        {
+                            BigInteger sum = new BigInteger(cheese[1]);
+                            for(int i=2; i<cheese.length;++i)
+                            {
+                                sum = sum.multiply(new BigInteger(cheese[i]));
+                            }
+                            write.writeBytes(sum.toString()+'\n');
+                        }
                     }
+                }
+                else if(op.equals("terminate")||op.equals("bye"))
+                {
+                    write.writeBytes(Integer.toString(-5)+'\n');
+                    if(op.equals("terminate"))
+                        break outloop;
                 }
                 else
                 {
                     System.out.println("Not valid operation");
-                    write.writeBytes(Integer.toString(-1)+'\n');
+                    write.writeBytes("-1"+'\n');
                 }
             }
-            break;
         }
         server.close();
     }

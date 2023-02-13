@@ -21,13 +21,8 @@ public class client {
             write.writeBytes(sentence+'\n');
             String test=read.readLine();
             System.out.println("From Server: "+test);
-
-            if(test=="-1"||test=="-2")
-            {
-                System.out.println("Err received");
-                System.out.println(test);
+            if(test.equals("-5"))
                 break;
-            }
         }
         client.close();
     }
